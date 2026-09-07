@@ -9,6 +9,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState('User');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -25,8 +31,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex h-screen overflow-hidden">
-        {/* Sidebar (Desktop) */}
-        <aside className="hidden md:flex flex-col w-64 border-r border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+        {/* Mobile Overlay */}
+        {isMobileMenuOpen && (
+          <div 
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+
+        {/* Sidebar */}
+        <aside className={`fixed md:relative inset-y-0 left-0 z-50 flex flex-col w-64 border-r border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transform transition-transform duration-200 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
           <div className="p-6">
             <h2 className="text-2xl font-bold tracking-tight text-indigo-600 dark:text-indigo-400">
               CWS<span className="text-gray-800 dark:text-gray-200">LMS</span>
@@ -74,7 +88,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex-1 flex flex-col min-w-0">
           <header className="md:hidden flex items-center justify-between p-4 border-b border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
             <h2 className="text-xl font-bold text-indigo-600">CWSLMS</h2>
-            <button className="p-2 bg-gray-100 dark:bg-zinc-800 rounded-md text-gray-600 dark:text-gray-300">
+            <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 bg-gray-100 dark:bg-zinc-800 rounded-md text-gray-600 dark:text-gray-300">
                <Menu size={20} />
             </button>
           </header>
