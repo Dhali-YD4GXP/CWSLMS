@@ -88,9 +88,10 @@ export default function LibraryPage() {
         <p className="text-sm text-gray-500 text-center max-w-md mb-6">
           Anda juga bisa menekan tombol di bawah untuk memilih file secara manual. Batas unggahan server diatur ke <strong className="text-gray-700 dark:text-gray-300">20MB per file</strong>.
         </p>
-        <button className="bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 text-gray-700 dark:text-gray-200 px-6 py-2.5 rounded-lg font-medium shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors pointer-events-none">
+        <label className="bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 text-gray-700 dark:text-gray-200 px-6 py-2.5 rounded-lg font-medium shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer">
           Pilih File Manual
-        </button>
+          <input type="file" className="hidden" accept=".pdf" onChange={handleFileSelect} />
+        </label>
       </div>
 
       {/* Daftar Grid Buku/File */}
