@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
 import taskRoutes from './routes/tasks';
 import libraryRoutes from './routes/library';
+import recycleBinRoutes from './routes/recycleBin';
 import path from 'path';
 
 dotenv.config();
@@ -23,6 +24,7 @@ app.use('/uploads', express.static(uploadDir));
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/library', libraryRoutes);
+app.use('/api/recycle-bin', recycleBinRoutes);
 
 // Health Check Endpoint
 app.get('/api/health', (req: Request, res: Response) => {

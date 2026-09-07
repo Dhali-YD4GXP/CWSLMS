@@ -31,9 +31,9 @@ export default function TasksKanbanPage() {
     setDraggedTaskId(null);
     try {
       await fetch(`/api/tasks/${taskId}/progress`, {
-        method: 'PUT',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ status: newStatus, user_id: localStorage.getItem('userId') })
       });
     } catch (err) { console.error(err); }
   };

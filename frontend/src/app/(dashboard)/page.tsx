@@ -28,7 +28,13 @@ export default function DashboardPage() {
       const res = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-        body: JSON.stringify(newTask)
+        body: JSON.stringify({
+          title: newTask.title,
+          task_type: newTask.type,
+          difficulty: newTask.difficulty,
+          due_date: newTask.dueDate,
+          created_by: localStorage.getItem('userId') || 'unknown'
+        })
       });
       if (res.ok) {
         const data = await res.json();
