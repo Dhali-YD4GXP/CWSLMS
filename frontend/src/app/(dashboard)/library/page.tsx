@@ -25,6 +25,38 @@ export default function LibraryPage() {
     setIsDragging(false);
   };
   
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      
+      if (file.type !== 'application/pdf') {
+        alert('Gagal: Sistem LMS ini hanya mengizinkan file berformat PDF.');
+        return;
+      }
+      if (file.size > 20 * 1024 * 1024) {
+        alert('Gagal: Ukuran file melebihi batas maksimal server (20MB).');
+        return;
+      }
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      try {
+        const res = await fetch('/api/library', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+          body: formData
+        });
+        if (res.ok) {
+          const result = await res.json();
+          setBooks([result.book, ...books]);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+  
   const onDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
