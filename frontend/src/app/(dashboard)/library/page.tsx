@@ -163,12 +163,21 @@ export default function LibraryPage() {
             </div>
 
             <div className="flex gap-2 mt-auto">
-              <button className="flex flex-1 items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 py-2 rounded-lg text-sm font-medium transition-colors">
+              <button 
+                onClick={() => window.open(`/uploads/${book.file_path}`, '_blank')}
+                className="flex flex-1 items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
                 <Eye size={16} /> Preview
               </button>
-              <button className="flex flex-1 items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg text-sm font-medium transition-colors">
+              <a 
+                href={`/uploads/${book.file_path}`}
+                download={book.title}
+                target="_blank"
+                rel="noreferrer"
+                className="flex flex-1 items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
                 <Download size={16} /> Unduh
-              </button>
+              </a>
             </div>
             
           </div>
