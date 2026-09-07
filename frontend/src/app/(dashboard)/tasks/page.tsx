@@ -83,18 +83,29 @@ export default function TasksKanbanPage() {
 
   const handleDragEnd = () => setDraggedTaskId(null);
 
-  const handleDrop = async (e: React.DragEvent, newStatus: string) => {
-    e.preventDefault();
-    const taskId = e.dataTransfer.getData('taskId');
+  const updateTaskStatus = async (taskId: string, newStatus: string) => {
     setTasks(tasks.map(t => t.id === taskId ? { ...t, myStatus: newStatus } : t));
-    setDraggedTaskId(null);
+    if (selectedTask && selectedTask.id === taskId) {
+      setSelectedTask({ ...selectedTask, myStatus: newStatus });
+    }
     try {
       await fetch(`/api/tasks/${taskId}/progress`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         body: JSON.stringify({ status: newStatus, user_id: localStorage.getItem('userId') })
       });
-    } catch (err) { console.error(err); }
+      toast.success('Status tugas diperbarui');
+    } catch (err) { 
+      console.error(err); 
+      toast.error('Gagal memperbarui status');
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, newStatus: string) => {
+    e.preventDefault();
+    const taskId = e.dataTransfer.getData('taskId');
+    updateTaskStatus(taskId, newStatus);
+    setDraggedTaskId(null);
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -244,9 +255,20 @@ export default function TasksKanbanPage() {
             <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shrink-0">
               <div>
                 <h2 className="text-2xl font-bold">{selectedTask.title}</h2>
-                <p className="text-sm text-gray-500 flex items-center gap-2 mt-1">
-                  <Calendar size={14} /> Tenggat: {new Date(selectedTask.dueDate).toLocaleDateString('id-ID')}
-                </p>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2">
+                  <p className="text-sm text-gray-500 flex items-center gap-2">
+                    <Calendar size={14} /> Tenggat: {new Date(selectedTask.dueDate).toLocaleDateString('id-ID')}
+                  </p>
+                  <select 
+                    value={selectedTask.myStatus} 
+                    onChange={(e) => updateTaskStatus(selectedTask.id, e.target.value)}
+                    className="text-xs font-semibold px-2.5 py-1 rounded-md border border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 text-indigo-700 dark:text-indigo-400 outline-none w-fit shadow-sm hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
+                  >
+                    <option value="todo">To Do</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="done">Done</option>
+                  </select>
+                </div>
               </div>
               <div className="flex gap-2">
                 <button 
