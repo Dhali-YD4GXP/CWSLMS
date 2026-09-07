@@ -36,8 +36,7 @@ export default function TasksKanbanPage() {
     setDraggedTaskId(taskId);
   };
 
-  const handleDeleteTask = async (id: string) => {
-    if (!confirm('Yakin ingin memindahkan tugas ini ke Recycle Bin?')) return;
+  const executeDeleteTask = async (id: string) => {
     try {
       const res = await fetch(`/api/tasks/${id}`, {
         method: 'DELETE',
@@ -50,10 +49,36 @@ export default function TasksKanbanPage() {
       if (res.ok) {
         setTasks(tasks.filter(t => t.id !== id));
         setSelectedTask(null);
+        toast.success('Tugas dipindahkan ke Recycle Bin');
       }
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const handleDeleteTask = (id: string) => {
+    toast((t) => (
+      <div className="flex flex-col gap-3">
+        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Yakin memindahkan tugas ini ke Recycle Bin?</p>
+        <div className="flex justify-end gap-2">
+          <button 
+            onClick={() => toast.dismiss(t.id)} 
+            className="px-3 py-1.5 text-xs font-medium bg-gray-100 dark:bg-zinc-800 rounded-md hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors"
+          >
+            Batal
+          </button>
+          <button 
+            onClick={() => {
+              toast.dismiss(t.id);
+              executeDeleteTask(id);
+            }} 
+            className="px-3 py-1.5 text-xs font-medium bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+          >
+            Ya, Hapus
+          </button>
+        </div>
+      </div>
+    ), { duration: Infinity });
   };
 
   const handleDragEnd = () => setDraggedTaskId(null);
