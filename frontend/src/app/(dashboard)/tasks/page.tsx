@@ -224,7 +224,7 @@ export default function TasksKanbanPage() {
                     </span>
                   </div>
                   
-                  <h3 className="font-semibold text-gray-900 dark:text-white leading-snug mb-4">{task.title}</h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-white leading-snug mb-4 break-words line-clamp-3">{task.title}</h3>
                   
                   <div className="flex justify-between items-center border-t border-gray-100 dark:border-zinc-800/80 pt-3 mt-2">
                     <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">

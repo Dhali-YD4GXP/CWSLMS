@@ -191,11 +191,11 @@ export default function LibraryPage() {
               <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg flex items-center justify-center shrink-0">
                 <FileText size={24} />
               </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100 leading-tight mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
+              <div className="min-w-0">
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 leading-tight mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2 break-all">
                   {book.title}
                 </h3>
-                <p className="text-xs text-gray-500">Diunggah oleh: {book.uploader} • {book.size}</p>
+                <p className="text-xs text-gray-500 truncate">Diunggah oleh: {book.uploader} • {book.size}</p>
               </div>
             </div>
 
