@@ -10,6 +10,7 @@ RUN npm install
 COPY . .
 
 # Build Next.js App
+ENV NEXT_PUBLIC_API_URL=https://cws.dhali.my.id/api
 RUN npm run build
 
 EXPOSE 3000

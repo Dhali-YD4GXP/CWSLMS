@@ -28,7 +28,7 @@ services:
     ports:
       - "5000:5000"
     command: >
-      sh -c "npx prisma migrate deploy && npx ts-node src/index.ts"
+      sh -c "npx prisma db push --accept-data-loss && npx ts-node src/index.ts"
 
   frontend:
     build: ./frontend
