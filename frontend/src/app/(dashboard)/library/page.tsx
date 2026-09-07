@@ -50,7 +50,7 @@ export default function LibraryPage() {
         });
         if (res.ok) {
           const result = await res.json();
-          setBooks([result.book, ...books]);
+          setBooks([result.data, ...books]);
         }
       } catch (err) {
         console.error(err);
@@ -155,8 +155,8 @@ export default function LibraryPage() {
             </div>
 
             <div className="flex flex-wrap gap-1 mb-4">
-              {book.tags.map(tag => (
-                <span key={tag} className="bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-300 text-[10px] uppercase font-bold px-2 py-0.5 rounded-md">
+              {book.tags?.map((tag: any, idx: number) => (
+                <span key={idx} className="bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded text-[10px] font-medium">
                   {tag}
                 </span>
               ))}

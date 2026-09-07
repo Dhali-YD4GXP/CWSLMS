@@ -12,7 +12,20 @@ export default function TasksKanbanPage() {
     fetch('/api/tasks', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } })
       .then(res => res.json())
       .then(data => {
-        if (data.tasks) setTasks(data.tasks);
+        if (data.data) {
+          const myId = localStorage.getItem('userId');
+          const mappedTasks = data.data.map((t: any) => {
+            const myProgress = t.progresses?.find((p: any) => p.user_id === myId);
+            return {
+              ...t,
+              dueDate: t.due_date,
+              myStatus: myProgress ? myProgress.status : 'todo',
+              comments: t.comments ? t.comments.length : 0,
+              peers: { done: [], inProgress: [] }
+            };
+          });
+          setTasks(mappedTasks);
+        }
       })
       .catch(console.error);
   }, []);
@@ -118,10 +131,10 @@ export default function TasksKanbanPage() {
                       <MessageSquare size={14} /> {task.comments} Diskusi
                     </div>
                     <div className="flex -space-x-1.5">
-                      {task.peers.done.map((p, i) => (
+                      {task.peers.done.map((p: any, i: number) => (
                         <div key={'d'+i} className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold border-2 border-white dark:border-zinc-950 z-20 shadow-sm">{p}</div>
                       ))}
-                      {task.peers.inProgress.map((p, i) => (
+                      {task.peers.inProgress.map((p: any, i: number) => (
                         <div key={'p'+i} className="w-6 h-6 rounded-full bg-amber-400 text-white flex items-center justify-center text-[10px] font-bold border-2 border-white dark:border-zinc-950 z-10 shadow-sm">{p}</div>
                       ))}
                     </div>

@@ -16,7 +16,7 @@ export default function DashboardPage() {
     fetch('/api/tasks')
       .then(res => res.json())
       .then(data => {
-        if (data.tasks) setTasks(data.tasks);
+        if (data.data) setTasks(data.data);
         if (data.metrics) setMetrics(data.metrics);
       })
       .catch(console.error);
@@ -38,7 +38,7 @@ export default function DashboardPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        setTasks([...tasks, data.task || newTask]); // fallback
+        setTasks([...tasks, data.data || newTask]); // fallback
         setIsModalOpen(false);
       } else {
         alert('Gagal tambah tugas');
@@ -167,7 +167,7 @@ function TaskColumn({ title, subtitle, dotColor, children }: any) {
 }
 
 function TaskCard({ task, badgeColor }: any) {
-  const date = new Date(task.dueDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+  const date = new Date(task.due_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
   return (
     <div className="bg-white dark:bg-zinc-900 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800 hover:border-indigo-500 dark:hover:border-indigo-500 transition-colors cursor-pointer group">
       <div className="flex justify-between items-start mb-3">
@@ -179,7 +179,7 @@ function TaskCard({ task, badgeColor }: any) {
         </span>
       </div>
       <h4 className="font-semibold text-gray-900 dark:text-gray-100 leading-tight mb-1">{task.title}</h4>
-      <p className="text-xs text-gray-500 capitalize">{task.type}</p>
+      <p className="text-xs text-gray-500 capitalize">{task.task_type}</p>
     </div>
   );
 }
