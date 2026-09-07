@@ -16,7 +16,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="id" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-screen bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-gray-100">
-        <Toaster position="bottom-right" />
+        <Toaster 
+          position="bottom-right" 
+          toastOptions={{
+            className: '!bg-white dark:!bg-zinc-900 !text-gray-800 dark:!text-gray-100 !border !border-gray-200 dark:!border-zinc-800 !shadow-lg',
+          }}
+        />
         {children}
       </body>
     </html>
