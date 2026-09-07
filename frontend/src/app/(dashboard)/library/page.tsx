@@ -10,7 +10,7 @@ export default function LibraryPage() {
     fetch('/api/library', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } })
       .then(res => res.json())
       .then(data => {
-        if (data.books) setBooks(data.books);
+        if (data.data) setBooks(data.data);
       })
       .catch(console.error);
   }, []);
