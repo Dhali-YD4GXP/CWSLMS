@@ -82,8 +82,28 @@ export default function TasksKanbanPage() {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         body: formData
       });
-      if (res.ok) alert('Berhasil unggah file');
-      else alert('Gagal unggah file');
+      if (res.ok) {
+        const uploadData = await res.json();
+        // Create comment as file representation
+        const commentRes = await fetch('/api/comments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+          body: JSON.stringify({
+            content: `[FILE]:${uploadData.file_path}|${file.name}`,
+            task_id: selectedTask.id,
+            user_id: localStorage.getItem('userId')
+          })
+        });
+        if (commentRes.ok) {
+          const data = await commentRes.json();
+          const newC = data.data;
+          setSelectedTask({ ...selectedTask, comments: [...selectedTask.comments, newC] });
+          setTasks(tasks.map(t => t.id === selectedTask.id ? { ...t, comments: [...t.comments, newC] } : t));
+          alert('Berhasil unggah file');
+        }
+      } else {
+        alert('Gagal unggah file');
+      }
     } catch(err) { console.error(err); }
   };
 
@@ -223,7 +243,7 @@ export default function TasksKanbanPage() {
               <div className="flex-1 flex flex-col border-r border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950">
                 <div className="flex-1 p-6 overflow-y-auto space-y-6">
                   {/* Chat/Diskusi */}
-                  {selectedTask.comments && selectedTask.comments.length > 0 ? selectedTask.comments.map((c: any) => (
+                  {selectedTask.comments && selectedTask.comments.filter((c: any) => !c.content.startsWith('[FILE]:')).length > 0 ? selectedTask.comments.filter((c: any) => !c.content.startsWith('[FILE]:')).map((c: any) => (
                     <div key={c.id} className="flex gap-4">
                       <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-700 dark:text-indigo-400 font-bold shrink-0">
                         {c.author?.username ? c.author.username[0].toUpperCase() : 'U'}
@@ -283,45 +303,36 @@ export default function TasksKanbanPage() {
                     </h4>
                     
                     {/* Item File Terkirim */}
-                    {selectedTask.myStatus === 'done' || selectedTask.peers.done.length > 0 ? (
-                      <div className="space-y-2">
-                        {/* File Anda */}
-                        {selectedTask.myStatus === 'done' && (
-                          <div className="flex items-center justify-between p-3 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/50 rounded-lg shadow-sm group">
-                            <div className="flex items-center gap-3 overflow-hidden">
-                              <FileText size={20} className="text-indigo-500 shrink-0" />
-                              <div className="truncate">
-                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">Tugas_{selectedTask.id}_Anda.pdf</p>
-                                <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium mt-0.5">Oleh: Anda (1.2 MB)</p>
+                    <div className="space-y-2">
+                      {selectedTask.comments && selectedTask.comments.filter((c: any) => c.content.startsWith('[FILE]:')).length > 0 ? (
+                        selectedTask.comments.filter((c: any) => c.content.startsWith('[FILE]:')).map((c: any) => {
+                          const parts = c.content.replace('[FILE]:', '').split('|');
+                          const filePath = parts[0];
+                          const fileName = parts.length > 1 ? parts[1] : filePath;
+                          const isMine = c.user_id === localStorage.getItem('userId');
+                          
+                          return (
+                            <div key={c.id} className={`flex items-center justify-between p-3 rounded-lg shadow-sm border ${isMine ? 'bg-indigo-50/50 dark:bg-indigo-950/20 border-indigo-100 dark:border-indigo-900/50' : 'bg-gray-50 dark:bg-zinc-800/50 border-gray-100 dark:border-zinc-800'} group`}>
+                              <div className="flex items-center gap-3 overflow-hidden">
+                                <FileText size={20} className={isMine ? 'text-indigo-500 shrink-0' : 'text-gray-400 shrink-0'} />
+                                <div className="truncate">
+                                  <a href={`/uploads/${filePath}`} target="_blank" rel="noreferrer" className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate hover:text-indigo-600 transition-colors">
+                                    {fileName}
+                                  </a>
+                                  <p className={`text-xs font-medium mt-0.5 ${isMine ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500'}`}>
+                                    Oleh: {c.author?.username || 'User'}
+                                  </p>
+                                </div>
                               </div>
                             </div>
-                            <button title="Hapus File" className="text-gray-400 hover:text-red-500 p-2 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        )}
-                        
-                        {/* File Teman */}
-                        {selectedTask.peers.done.map((p: string, i: number) => (
-                          <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-lg shadow-sm group">
-                            <div className="flex items-center gap-3 overflow-hidden">
-                              <FileText size={20} className="text-gray-400 shrink-0" />
-                              <div className="truncate">
-                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">Tugas_Jawaban_{p}.pdf</p>
-                                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">Oleh: {p} (900 KB)</p>
-                              </div>
-                            </div>
-                            <button title="Unduh File Teman" className="text-gray-400 hover:text-indigo-500 font-medium text-xs px-2 py-1 rounded-md hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors">
-                              Unduh
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-sm text-gray-500 italic text-center py-4 bg-gray-50 dark:bg-zinc-950 rounded-lg border border-gray-100 dark:border-zinc-800">
-                        Belum ada teman yang mengunggah file.
-                      </div>
-                    )}
+                          );
+                        })
+                      ) : (
+                        <div className="text-sm text-gray-500 italic text-center py-4 bg-gray-50 dark:bg-zinc-950 rounded-lg border border-gray-100 dark:border-zinc-800">
+                          Belum ada file yang terkumpul.
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                 </div>
