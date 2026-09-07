@@ -1,19 +1,14 @@
 import React from 'react';
 import { Package, FileText, AlertTriangle, Calendar, Plus } from 'lucide-react';
 
-// Mock data: In the future this will be fetched from the backend API
+// Data awal (Kosong - Siap diisi dari API)
 const metrics = {
-  upcomingTasks: 12,
-  upcomingQuizzes: 3,
-  urgentTasks: 2, // H-1
+  upcomingTasks: 0,
+  upcomingQuizzes: 0,
+  urgentTasks: 0,
 };
 
-const tasks = [
-  { id: 1, title: 'Makalah Sistem Terdistribusi', type: 'assignment', difficulty: 'hard', dueDate: '2023-11-10T10:00:00Z', status: 'todo' },
-  { id: 2, title: 'Kuis Jaringan Komputer', type: 'quiz', difficulty: 'hard', dueDate: '2023-11-12T10:00:00Z', status: 'todo' },
-  { id: 3, title: 'Review Jurnal UI/UX', type: 'assignment', difficulty: 'medium', dueDate: '2023-11-15T10:00:00Z', status: 'todo' },
-  { id: 4, title: 'Baca Bab 3 - OS', type: 'assignment', difficulty: 'easy', dueDate: '2023-11-20T10:00:00Z', status: 'todo' },
-];
+const tasks: any[] = [];
 
 export default function DashboardPage() {
   return (

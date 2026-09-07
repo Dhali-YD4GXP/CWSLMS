@@ -2,12 +2,8 @@
 import React, { useState } from 'react';
 import { UploadCloud, FileText, Eye, Download } from 'lucide-react';
 
-// Simulasi Data Database
-const initialBooks = [
-  { id: '1', title: 'Buku Ajar Jaringan Komputer', size: '4.5 MB', uploader: 'Budi', tags: ['Referensi', 'Semester 5'] },
-  { id: '2', title: 'Slide Presentasi Keamanan Jaringan', size: '2.1 MB', uploader: 'Siti', tags: ['Tugas Kelompok', 'Penting'] },
-  { id: '3', title: 'Jurnal Deep Learning 2023', size: '12.4 MB', uploader: 'Joko', tags: ['Opsional'] },
-];
+// Data awal (Kosong - Siap diisi dari API)
+const initialBooks: any[] = [];
 
 export default function LibraryPage() {
   const [books, setBooks] = useState(initialBooks);

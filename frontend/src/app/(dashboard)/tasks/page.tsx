@@ -2,39 +2,8 @@
 import React, { useState } from 'react';
 import { Calendar, MessageSquare, X, Send, UploadCloud, FileText, Trash2 } from 'lucide-react';
 
-// Simulasi Data dari Backend
-const initialTasks = [
-  {
-    id: '1',
-    title: 'Makalah Sistem Terdistribusi',
-    dueDate: '2023-11-10',
-    difficulty: 'hard',
-    type: 'assignment',
-    myStatus: 'todo',
-    peers: { inProgress: ['B'], done: ['A', 'S'] },
-    comments: 4
-  },
-  {
-    id: '2',
-    title: 'Review Jurnal UI/UX',
-    dueDate: '2023-11-15',
-    difficulty: 'medium',
-    type: 'assignment',
-    myStatus: 'in_progress',
-    peers: { inProgress: ['J', 'R'], done: [] },
-    comments: 0
-  },
-  {
-    id: '3',
-    title: 'Kuis Jaringan Komputer',
-    dueDate: '2023-11-12',
-    difficulty: 'hard',
-    type: 'quiz',
-    myStatus: 'done',
-    peers: { inProgress: [], done: ['B', 'J', 'S', 'A'] },
-    comments: 12
-  }
-];
+// Data awal (Kosong - Siap diisi dari API)
+const initialTasks: any[] = [];
 
 export default function TasksKanbanPage() {
   const [tasks, setTasks] = useState(initialTasks);

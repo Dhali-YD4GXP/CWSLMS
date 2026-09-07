@@ -2,10 +2,8 @@
 import React, { useState } from 'react';
 import { RotateCcw, Trash2, Clock, CheckCircle } from 'lucide-react';
 
-const initialDeletedItems = [
-  { id: '1', title: 'Tugas Makalah AI', type: 'Task', deletedAt: '2023-10-12T14:30:00Z', deletedBy: 'Budi' },
-  { id: '2', title: 'Buku Pemrograman Dasar', type: 'Book', deletedAt: '2023-10-15T09:15:00Z', deletedBy: 'Andi' },
-];
+// Data awal (Kosong - Siap diisi dari API)
+const initialDeletedItems: any[] = [];
 
 export default function RecycleBinPage() {
   const [items, setItems] = useState(initialDeletedItems);
