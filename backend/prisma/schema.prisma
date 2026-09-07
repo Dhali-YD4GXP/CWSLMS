@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  username      String    @unique
+  email         String    @unique
+  password_hash String
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  deleted_at    DateTime?
+
+  tasks         Task[]          // Tugas yang dibuat oleh user ini
+  materials     Material[]
+  books         Book[]
+  comments      Comment[]
+  activityLogs  ActivityLog[]
+  taskProgress  TaskProgress[]  // Progress individu untuk setiap tugas
+
+  @@map("users")
+}
+
+model Task {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  due_date    DateTime?
+  difficulty  String    @default("medium") // easy, medium, hard
+  task_type   String    @default("assignment") // assignment, quiz, exam
+  created_by  String
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  author      User           @relation(fields: [created_by], references: [id])
+  comments    Comment[]
+  progresses  TaskProgress[] // Relasi ke progress individu mahasiswa
+
+  @@map("tasks")
+}
+
+// Model baru untuk menyimpan status individu setiap pengguna terhadap suatu tugas
+model TaskProgress {
+  id          String   @id @default(uuid())
+  task_id     String
+  user_id     String
+  status      String   @default("todo") // todo, in_progress, done
+  updated_at  DateTime @updatedAt
+
+  task        Task     @relation(fields: [task_id], references: [id])
+  user        User     @relation(fields: [user_id], references: [id])
+
+  @@unique([task_id, user_id]) // Satu user hanya punya satu status untuk satu tugas
+  @@map("task_progress")
+}
+
+model Material {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  url         String
+  course_name String?
+  tags        String[]
+  created_by  String
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  author      User      @relation(fields: [created_by], references: [id])
+  comments    Comment[]
+
+  @@map("materials")
+}
+
+model Book {
+  id          String    @id @default(uuid())
+  title       String
+  file_path   String
+  file_size   Int
+  course_name String?
+  tags        String[]
+  created_by  String
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  author      User      @relation(fields: [created_by], references: [id])
+  comments    Comment[]
+
+  @@map("books")
+}
+
+model Comment {
+  id          String    @id @default(uuid())
+  user_id     String
+  task_id     String?
+  material_id String?
+  book_id     String?
+  content     String
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  author      User      @relation(fields: [user_id], references: [id])
+  task        Task?     @relation(fields: [task_id], references: [id])
+  material    Material? @relation(fields: [material_id], references: [id])
+  book        Book?     @relation(fields: [book_id], references: [id])
+
+  @@map("comments")
+}
+
+model ActivityLog {
+  id          String    @id @default(uuid())
+  user_id     String?
+  action      String    // CREATE, UPDATE, DELETE, RESTORE
+  entity_type String    // task, material, book, comment
+  entity_id   String
+  description String
+  created_at  DateTime  @default(now())
+
+  user        User?     @relation(fields: [user_id], references: [id])
+
+  @@map("activity_logs")
+}
