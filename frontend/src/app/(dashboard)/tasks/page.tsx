@@ -9,27 +9,51 @@ export default function TasksKanbanPage() {
   const [selectedTask, setSelectedTask] = useState<any | null>(null);
   const [newComment, setNewComment] = useState("");
 
+  const fetchTasks = async () => {
+    try {
+      const res = await fetch('/api/tasks', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+      const data = await res.json();
+      if (data.data) {
+        const myId = localStorage.getItem('userId');
+        const mappedTasks = data.data.map((t: any) => {
+          const myProgress = t.progresses?.find((p: any) => p.user_id === myId);
+          return {
+            ...t,
+            dueDate: t.due_date,
+            myStatus: myProgress ? myProgress.status : 'todo',
+            comments: t.comments || [],
+            peers: { done: [], inProgress: [] }
+          };
+        });
+        setTasks(mappedTasks);
+      }
+    } catch(err) { console.error(err); }
+  };
+
   useEffect(() => {
-    fetch('/api/tasks', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } })
-      .then(res => res.json())
-      .then(data => {
-        if (data.data) {
-          const myId = localStorage.getItem('userId');
-          const mappedTasks = data.data.map((t: any) => {
-            const myProgress = t.progresses?.find((p: any) => p.user_id === myId);
-            return {
-              ...t,
-              dueDate: t.due_date,
-              myStatus: myProgress ? myProgress.status : 'todo',
-              comments: t.comments || [],
-              peers: { done: [], inProgress: [] }
-            };
-          });
-          setTasks(mappedTasks);
-        }
-      })
-      .catch(console.error);
+    fetchTasks();
+    const interval = setInterval(fetchTasks, 3000); // Auto-refresh setiap 3 detik
+    return () => clearInterval(interval);
   }, []);
+
+  // Sync selectedTask and trigger notification
+  useEffect(() => {
+    if (selectedTask) {
+      const updated = tasks.find(t => t.id === selectedTask.id);
+      if (updated) {
+        if (updated.comments.length > selectedTask.comments.length) {
+          const latest = updated.comments[updated.comments.length - 1];
+          if (latest.user_id !== localStorage.getItem('userId') && !latest.content.startsWith('[FILE]:')) {
+            toast.success(`Pesan baru dari ${latest.author?.username || 'Seseorang'}`, { icon: '💬' });
+          }
+        }
+        // Update to keep it fresh
+        if (JSON.stringify(updated) !== JSON.stringify(selectedTask)) {
+          setSelectedTask(updated);
+        }
+      }
+    }
+  }, [tasks]);
 
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData('taskId', taskId);
@@ -291,22 +315,34 @@ export default function TasksKanbanPage() {
               <div className="flex-1 flex flex-col border-r border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950">
                 <div className="flex-1 p-6 overflow-y-auto space-y-6">
                   {/* Chat/Diskusi */}
-                  {selectedTask.comments && selectedTask.comments.filter((c: any) => !c.content.startsWith('[FILE]:')).length > 0 ? selectedTask.comments.filter((c: any) => !c.content.startsWith('[FILE]:')).map((c: any) => (
-                    <div key={c.id} className="flex gap-4">
-                      <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-700 dark:text-indigo-400 font-bold shrink-0">
-                        {c.author?.username ? c.author.username[0].toUpperCase() : 'U'}
-                      </div>
-                      <div>
-                        <div className="flex items-baseline gap-2 mb-1">
-                          <span className="font-semibold text-sm">{c.author?.username || 'User'}</span>
-                          <span className="text-xs text-gray-400">{new Date(c.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                  {selectedTask.comments && selectedTask.comments.filter((c: any) => !c.content.startsWith('[FILE]:')).length > 0 ? selectedTask.comments.filter((c: any) => !c.content.startsWith('[FILE]:')).map((c: any) => {
+                    const isMine = c.user_id === localStorage.getItem('userId');
+                    return (
+                      <div key={c.id} className={`flex gap-3 ${isMine ? 'flex-row-reverse' : 'flex-row'}`}>
+                        {/* Avatar */}
+                        {!isMine && (
+                          <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-700 dark:text-indigo-400 font-bold shrink-0 text-xs">
+                            {c.author?.username ? c.author.username[0].toUpperCase() : 'U'}
+                          </div>
+                        )}
+                        
+                        {/* Chat Bubble Container */}
+                        <div className={`flex flex-col ${isMine ? 'items-end' : 'items-start'} max-w-[75%]`}>
+                          <div className={`flex items-baseline gap-2 mb-1 ${isMine ? 'flex-row-reverse' : 'flex-row'}`}>
+                            <span className="font-semibold text-xs text-gray-500 dark:text-gray-400">{isMine ? 'Anda' : (c.author?.username || 'User')}</span>
+                            <span className="text-[10px] text-gray-400">{new Date(c.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                          </div>
+                          <div className={`p-3 text-sm shadow-sm w-fit ${
+                            isMine 
+                              ? 'bg-indigo-500 text-white rounded-2xl rounded-tr-none' 
+                              : 'bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 text-gray-700 dark:text-gray-200 rounded-2xl rounded-tl-none'
+                          }`}>
+                            {c.content}
+                          </div>
                         </div>
-                        <div className="bg-white dark:bg-zinc-900 p-3 rounded-2xl rounded-tl-none shadow-sm border border-gray-200 dark:border-zinc-800 text-sm text-gray-700 dark:text-gray-300">
-                          {c.content}
-                        </div>
                       </div>
-                    </div>
-                  )) : (
+                    );
+                  }) : (
                     <div className="text-sm text-gray-500 italic text-center py-4">Belum ada diskusi. Mulai percakapan sekarang!</div>
                   )}
                 </div>
