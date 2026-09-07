@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Calendar, MessageSquare, X, Send, UploadCloud, FileText, Trash2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function TasksKanbanPage() {
   const [tasks, setTasks] = useState<any[]>([]);
@@ -99,10 +100,10 @@ export default function TasksKanbanPage() {
           const newC = data.data;
           setSelectedTask({ ...selectedTask, comments: [...selectedTask.comments, newC] });
           setTasks(tasks.map(t => t.id === selectedTask.id ? { ...t, comments: [...t.comments, newC] } : t));
-          alert('Berhasil unggah file');
+          toast.success('Berhasil unggah file!');
         }
       } else {
-        alert('Gagal unggah file');
+        toast.error('Gagal unggah file!');
       }
     } catch(err) { console.error(err); }
   };

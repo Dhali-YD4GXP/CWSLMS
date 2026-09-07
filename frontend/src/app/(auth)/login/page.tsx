@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Mail, Lock, LogIn } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -24,13 +25,14 @@ export default function LoginPage() {
           if (data.user.username) localStorage.setItem('username', data.user.username);
           if (data.user.id) localStorage.setItem('userId', data.user.id);
         }
+        toast.success('Berhasil login!');
         router.push('/');
       } else {
-        alert('Login failed');
+        toast.error('Login gagal: Kredensial tidak valid');
       }
     } catch (err) {
       console.error(err);
-      alert('Error connecting to server');
+      toast.error('Gagal menghubungi server');
     }
   };
 

@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { UploadCloud, FileText, Eye, Download, Trash2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function LibraryPage() {
   const [books, setBooks] = useState<any[]>([]);
@@ -49,11 +50,11 @@ export default function LibraryPage() {
       const file = e.target.files[0];
       
       if (file.type !== 'application/pdf') {
-        alert('Gagal: Sistem LMS ini hanya mengizinkan file berformat PDF.');
+        toast.error('Gagal: Hanya mendukung format PDF.');
         return;
       }
       if (file.size > 20 * 1024 * 1024) {
-        alert('Gagal: Ukuran file melebihi batas maksimal server (20MB).');
+        toast.error('Gagal: Maksimal ukuran file 20MB.');
         return;
       }
       
@@ -85,11 +86,11 @@ export default function LibraryPage() {
       const file = e.dataTransfer.files[0];
       
       if (file.type !== 'application/pdf') {
-        alert('Gagal: Sistem LMS ini hanya mengizinkan file berformat PDF.');
+        toast.error('Gagal: Hanya mendukung format PDF.');
         return;
       }
       if (file.size > 20 * 1024 * 1024) {
-        alert('Gagal: Ukuran file melebihi batas maksimal server (20MB).');
+        toast.error('Gagal: Maksimal ukuran file 20MB.');
         return;
       }
       
@@ -106,9 +107,9 @@ export default function LibraryPage() {
         if (res.ok) {
           const data = await res.json();
           setBooks([data.book, ...books]);
-          alert('Berhasil upload PDF');
+          toast.success('Berhasil unggah PDF!');
         } else {
-          alert('Gagal upload');
+          toast.error('Gagal unggah file!');
         }
       } catch (err) {
         console.error(err);

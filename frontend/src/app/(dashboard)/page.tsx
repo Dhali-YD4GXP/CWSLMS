@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Package, FileText, AlertTriangle, Calendar, Plus, X } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function DashboardPage() {
   const [metrics, setMetrics] = useState({ upcomingTasks: 0, upcomingQuizzes: 0, urgentTasks: 0 });
@@ -38,13 +39,16 @@ export default function DashboardPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        setTasks([...tasks, data.data || newTask]); // fallback
+        setTasks([...tasks, data.data || newTask]);
         setIsModalOpen(false);
+        setNewTask({ title: '', dueDate: '', difficulty: 'medium', type: 'task' });
+        toast.success('Berhasil menambahkan tugas!');
       } else {
-        alert('Gagal tambah tugas');
+        toast.error('Gagal tambah tugas');
       }
     } catch (err) {
       console.error(err);
+      toast.error('Gagal menghubungi server');
     }
   };
 

@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { RotateCcw, Trash2, Clock, CheckCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function RecycleBinPage() {
   const [items, setItems] = useState<any[]>([]);
@@ -28,17 +29,18 @@ export default function RecycleBinPage() {
       });
       
       if (res.ok) {
+        setRestoredId(id);
+        toast.success('Berhasil memulihkan item!');
         setTimeout(() => {
           setItems(items.filter(item => item.id !== id));
           setRestoredId(null);
-        }, 1000);
+        }, 1500);
       } else {
-        setRestoredId(null);
-        alert('Gagal memulihkan item');
+        toast.error('Gagal memulihkan item!');
       }
     } catch (err) {
-      setRestoredId(null);
       console.error(err);
+      toast.error('Koneksi bermasalah!');
     }
   };
 

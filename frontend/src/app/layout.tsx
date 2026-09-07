@@ -10,10 +10,13 @@ export const metadata: Metadata = {
   description: "Lightweight, collaborative Learning Management System for a peer group.",
 };
 
+import { Toaster } from 'react-hot-toast';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="id" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-screen bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-gray-100">
+        <Toaster position="bottom-right" />
         {children}
       </body>
     </html>
