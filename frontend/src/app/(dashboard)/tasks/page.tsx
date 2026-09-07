@@ -44,7 +44,7 @@ export default function TasksKanbanPage() {
     const formData = new FormData();
     formData.append('file', file);
     try {
-      const res = await fetch(`/api/tasks/${selectedTask.id}/upload`, {
+      const res = await fetch(`/api/tasks/upload`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         body: formData

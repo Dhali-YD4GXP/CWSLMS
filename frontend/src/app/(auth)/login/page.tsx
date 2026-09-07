@@ -20,8 +20,9 @@ export default function LoginPage() {
       if (res.ok) {
         const data = await res.json();
         localStorage.setItem('token', data.token);
-        if (data.user && data.user.username) {
-          localStorage.setItem('username', data.user.username);
+        if (data.user) {
+          if (data.user.username) localStorage.setItem('username', data.user.username);
+          if (data.user.id) localStorage.setItem('userId', data.user.id);
         }
         router.push('/');
       } else {

@@ -40,9 +40,10 @@ export default function LibraryPage() {
       
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('created_by', localStorage.getItem('userId') || '');
       
       try {
-        const res = await fetch('/api/library', {
+        const res = await fetch('/api/library/upload', {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
           body: formData
@@ -75,9 +76,10 @@ export default function LibraryPage() {
       
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('created_by', localStorage.getItem('userId') || '');
 
       try {
-        const res = await fetch('/api/library', {
+        const res = await fetch('/api/library/upload', {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
           body: formData
