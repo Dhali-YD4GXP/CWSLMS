@@ -1,15 +1,20 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UploadCloud, FileText, Eye, Download } from 'lucide-react';
 
-// Data awal (Kosong - Siap diisi dari API)
-const initialBooks: any[] = [];
-
 export default function LibraryPage() {
-  const [books, setBooks] = useState(initialBooks);
+  const [books, setBooks] = useState<any[]>([]);
   const [isDragging, setIsDragging] = useState(false);
 
-  // Event handler untuk Drag & Drop file PDF
+  useEffect(() => {
+    fetch('/api/library', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } })
+      .then(res => res.json())
+      .then(data => {
+        if (data.books) setBooks(data.books);
+      })
+      .catch(console.error);
+  }, []);
+
   const onDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
@@ -20,14 +25,13 @@ export default function LibraryPage() {
     setIsDragging(false);
   };
   
-  const onDrop = (e: React.DragEvent) => {
+  const onDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
       
-      // Validasi Frontend (Sesuai arahan limit 20MB dan format PDF)
       if (file.type !== 'application/pdf') {
         alert('Gagal: Sistem LMS ini hanya mengizinkan file berformat PDF.');
         return;
@@ -37,16 +41,25 @@ export default function LibraryPage() {
         return;
       }
       
-      // Simulasi sukses upload
-      const newBook = {
-        id: Math.random().toString(),
-        title: file.name.replace('.pdf', ''),
-        size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
-        uploader: 'Anda (Saya)',
-        tags: ['Baru Upload']
-      };
-      
-      setBooks([newBook, ...books]);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch('/api/library', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+          body: formData
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setBooks([data.book, ...books]);
+          alert('Berhasil upload PDF');
+        } else {
+          alert('Gagal upload');
+        }
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 

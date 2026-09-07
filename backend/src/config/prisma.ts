@@ -7,20 +7,20 @@ const prismaWithSoftDelete = prisma.$extends({
   query: {
     $allModels: {
       // Mencegat semua query pencarian untuk memfilter data yang terhapus (soft deleted)
-      async findMany({ model, args, query }) {
+      async findMany({ model, args, query }: any) {
         if (model !== 'ActivityLog') {
           args.where = { ...args.where, deleted_at: null };
         }
         return query(args);
       },
-      async findFirst({ model, args, query }) {
+      async findFirst({ model, args, query }: any) {
         if (model !== 'ActivityLog') {
           args.where = { ...args.where, deleted_at: null };
         }
         return query(args);
       },
       // Mencegat operasi delete agar menjadi operasi update deleted_at
-      async delete({ model, args, query }) {
+      async delete({ model, args, query }: any) {
         if (model !== 'ActivityLog') {
           return (prisma as any)[model].update({
             ...args,
@@ -29,7 +29,7 @@ const prismaWithSoftDelete = prisma.$extends({
         }
         return query(args);
       },
-      async deleteMany({ model, args, query }) {
+      async deleteMany({ model, args, query }: any) {
         if (model !== 'ActivityLog') {
           return (prisma as any)[model].updateMany({
             ...args,

@@ -1,19 +1,38 @@
 'use client';
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { KeyRound, Mail, User, Lock, ArrowRight } from 'lucide-react';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', passcode: '' });
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Di backend, ini akan dicek melawan env variabel rahasia
     if (formData.passcode !== 'CWS-2023') { 
       alert('❌ Akses Ditolak: Kode Kelas Rahasia (Passcode) tidak valid! Anda bukan anggota kelas ini.');
       return;
     }
-    alert(`✅ Berhasil mendaftar! Selamat datang ${formData.name}`);
+    
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.token) localStorage.setItem('token', data.token);
+        alert(`✅ Berhasil mendaftar! Selamat datang ${formData.name}`);
+        router.push('/');
+      } else {
+        alert('Gagal mendaftar.');
+      }
+    } catch (err) {
+      alert('Error koneksi server');
+    }
   };
 
   return (

@@ -1,15 +1,21 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, MessageSquare, X, Send, UploadCloud, FileText, Trash2 } from 'lucide-react';
 
-// Data awal (Kosong - Siap diisi dari API)
-const initialTasks: any[] = [];
-
 export default function TasksKanbanPage() {
-  const [tasks, setTasks] = useState(initialTasks);
+  const [tasks, setTasks] = useState<any[]>([]);
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
-  const [selectedTask, setSelectedTask] = useState<any | null>(null); // State untuk Modal
+  const [selectedTask, setSelectedTask] = useState<any | null>(null);
   const [newComment, setNewComment] = useState("");
+
+  useEffect(() => {
+    fetch('/api/tasks', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } })
+      .then(res => res.json())
+      .then(data => {
+        if (data.tasks) setTasks(data.tasks);
+      })
+      .catch(console.error);
+  }, []);
 
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData('taskId', taskId);
@@ -18,11 +24,34 @@ export default function TasksKanbanPage() {
 
   const handleDragEnd = () => setDraggedTaskId(null);
 
-  const handleDrop = (e: React.DragEvent, newStatus: string) => {
+  const handleDrop = async (e: React.DragEvent, newStatus: string) => {
     e.preventDefault();
     const taskId = e.dataTransfer.getData('taskId');
     setTasks(tasks.map(t => t.id === taskId ? { ...t, myStatus: newStatus } : t));
     setDraggedTaskId(null);
+    try {
+      await fetch(`/api/tasks/${taskId}/progress`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        body: JSON.stringify({ status: newStatus })
+      });
+    } catch (err) { console.error(err); }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !e.target.files.length || !selectedTask) return;
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const res = await fetch(`/api/tasks/${selectedTask.id}/upload`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        body: formData
+      });
+      if (res.ok) alert('Berhasil unggah file');
+      else alert('Gagal unggah file');
+    } catch(err) { console.error(err); }
   };
 
   const allowDrop = (e: React.DragEvent) => e.preventDefault();
@@ -182,7 +211,7 @@ export default function TasksKanbanPage() {
                   
                   {/* Upload Dropzone */}
                   <label className="border-2 border-dashed border-gray-300 dark:border-zinc-700 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/10 hover:border-indigo-400 transition-colors group mb-8">
-                    <input type="file" className="hidden" />
+                    <input type="file" className="hidden" onChange={handleFileUpload} />
                     <UploadCloud className="text-gray-400 group-hover:text-indigo-500 mb-4 transition-colors" size={40} strokeWidth={1.5} />
                     <p className="text-sm text-gray-700 dark:text-gray-300 font-semibold mb-1">Klik atau tarik file ke sini</p>
                     <p className="text-xs text-gray-500">Maksimal 20MB (PDF/ZIP)</p>

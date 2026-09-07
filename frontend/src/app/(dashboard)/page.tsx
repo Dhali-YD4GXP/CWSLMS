@@ -1,16 +1,43 @@
-import React from 'react';
-import { Package, FileText, AlertTriangle, Calendar, Plus } from 'lucide-react';
-
-// Data awal (Kosong - Siap diisi dari API)
-const metrics = {
-  upcomingTasks: 0,
-  upcomingQuizzes: 0,
-  urgentTasks: 0,
-};
-
-const tasks: any[] = [];
+'use client';
+import React, { useState, useEffect } from 'react';
+import { Package, FileText, AlertTriangle, Calendar, Plus, X } from 'lucide-react';
 
 export default function DashboardPage() {
+  const [metrics, setMetrics] = useState({ upcomingTasks: 0, upcomingQuizzes: 0, urgentTasks: 0 });
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newTask, setNewTask] = useState({ title: '', type: 'task', difficulty: 'medium', dueDate: '' });
+
+  useEffect(() => {
+    fetch('/api/tasks')
+      .then(res => res.json())
+      .then(data => {
+        if (data.tasks) setTasks(data.tasks);
+        if (data.metrics) setMetrics(data.metrics);
+      })
+      .catch(console.error);
+  }, []);
+
+  const handleAddTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        body: JSON.stringify(newTask)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTasks([...tasks, data.task || newTask]); // fallback
+        setIsModalOpen(false);
+      } else {
+        alert('Gagal tambah tugas');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <main className="p-6 lg:p-10 font-sans">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -21,11 +48,41 @@ export default function DashboardPage() {
             <h1 className="text-3xl font-bold tracking-tight">Selamat datang, Andi</h1>
             <p className="text-gray-500 dark:text-gray-400 mt-1">Berikut adalah ikhtisar tugas dan kuis Anda di kelas ini.</p>
           </div>
-          <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm">
+          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm">
             <Plus size={18} />
             Tambah Tugas
           </button>
         </header>
+
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 w-full max-w-md">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Tambah Tugas Baru</h2>
+                <button onClick={() => setIsModalOpen(false)}><X size={20} /></button>
+              </div>
+              <form onSubmit={handleAddTask} className="space-y-4">
+                <div>
+                  <label className="block text-sm mb-1">Judul Tugas</label>
+                  <input required type="text" className="w-full border rounded-lg p-2 dark:bg-zinc-800 dark:border-zinc-700" value={newTask.title} onChange={e => setNewTask({...newTask, title: e.target.value})} />
+                </div>
+                <div>
+                  <label className="block text-sm mb-1">Tenggat Waktu</label>
+                  <input required type="date" className="w-full border rounded-lg p-2 dark:bg-zinc-800 dark:border-zinc-700" value={newTask.dueDate} onChange={e => setNewTask({...newTask, dueDate: e.target.value})} />
+                </div>
+                <div>
+                  <label className="block text-sm mb-1">Tingkat Kesulitan</label>
+                  <select className="w-full border rounded-lg p-2 dark:bg-zinc-800 dark:border-zinc-700" value={newTask.difficulty} onChange={e => setNewTask({...newTask, difficulty: e.target.value})}>
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                  </select>
+                </div>
+                <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700">Simpan Tugas</button>
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
