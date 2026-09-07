@@ -20,6 +20,9 @@ export default function LoginPage() {
       if (res.ok) {
         const data = await res.json();
         localStorage.setItem('token', data.token);
+        if (data.user && data.user.username) {
+          localStorage.setItem('username', data.user.username);
+        }
         router.push('/');
       } else {
         alert('Login failed');

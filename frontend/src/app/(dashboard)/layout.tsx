@@ -8,13 +8,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
   const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [username, setUsername] = useState('User');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    const storedUsername = localStorage.getItem('username');
     if (!token) {
       router.push('/login');
     } else {
       setIsAuthenticated(true);
+      if (storedUsername) setUsername(storedUsername);
     }
   }, [router, pathname]);
 
@@ -46,9 +49,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           
           <div className="p-4 border-t border-gray-200 dark:border-zinc-800 flex items-center justify-between">
             <div className="flex items-center gap-3 px-2">
-              <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold shadow-sm">A</div>
-              <div>
-                <p className="text-sm font-semibold">User Egaliter</p>
+              <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold shadow-sm">
+                {username.charAt(0).toUpperCase()}
+              </div>
+              <div className="overflow-hidden">
+                <p className="text-sm font-semibold truncate">{username}</p>
                 <p className="text-xs text-gray-500">Anggota Kelas</p>
               </div>
             </div>

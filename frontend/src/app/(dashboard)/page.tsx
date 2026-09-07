@@ -7,8 +7,12 @@ export default function DashboardPage() {
   const [tasks, setTasks] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newTask, setNewTask] = useState({ title: '', type: 'task', difficulty: 'medium', dueDate: '' });
+  const [username, setUsername] = useState('User');
 
   useEffect(() => {
+    const storedName = localStorage.getItem('username');
+    if (storedName) setUsername(storedName);
+
     fetch('/api/tasks')
       .then(res => res.json())
       .then(data => {
@@ -45,7 +49,7 @@ export default function DashboardPage() {
         {/* Header */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Selamat datang, Andi</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Selamat datang, {username}</h1>
             <p className="text-gray-500 dark:text-gray-400 mt-1">Berikut adalah ikhtisar tugas dan kuis Anda di kelas ini.</p>
           </div>
           <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm">
