@@ -20,7 +20,7 @@ export default function TasksKanbanPage() {
               ...t,
               dueDate: t.due_date,
               myStatus: myProgress ? myProgress.status : 'todo',
-              comments: t.comments ? t.comments.length : 0,
+              comments: t.comments || [],
               peers: { done: [], inProgress: [] }
             };
           });
@@ -33,6 +33,26 @@ export default function TasksKanbanPage() {
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData('taskId', taskId);
     setDraggedTaskId(taskId);
+  };
+
+  const handleDeleteTask = async (id: string) => {
+    if (!confirm('Yakin ingin memindahkan tugas ini ke Recycle Bin?')) return;
+    try {
+      const res = await fetch(`/api/tasks/${id}`, {
+        method: 'DELETE',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}` 
+        },
+        body: JSON.stringify({ user_id: localStorage.getItem('userId') })
+      });
+      if (res.ok) {
+        setTasks(tasks.filter(t => t.id !== id));
+        setSelectedTask(null);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleDragEnd = () => setDraggedTaskId(null);
@@ -64,6 +84,29 @@ export default function TasksKanbanPage() {
       });
       if (res.ok) alert('Berhasil unggah file');
       else alert('Gagal unggah file');
+    } catch(err) { console.error(err); }
+  };
+
+  const submitComment = async () => {
+    if (!newComment.trim() || !selectedTask) return;
+    try {
+      const res = await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        body: JSON.stringify({
+          content: newComment,
+          task_id: selectedTask.id,
+          user_id: localStorage.getItem('userId')
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const newC = data.data;
+        // update selectedTask and tasks list
+        setSelectedTask({ ...selectedTask, comments: [...selectedTask.comments, newC] });
+        setTasks(tasks.map(t => t.id === selectedTask.id ? { ...t, comments: [...t.comments, newC] } : t));
+        setNewComment("");
+      }
     } catch(err) { console.error(err); }
   };
 
@@ -128,7 +171,7 @@ export default function TasksKanbanPage() {
                   
                   <div className="flex justify-between items-center border-t border-gray-100 dark:border-zinc-800/80 pt-3 mt-2">
                     <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
-                      <MessageSquare size={14} /> {task.comments} Diskusi
+                      <MessageSquare size={14} /> {task.comments.length} Diskusi
                     </div>
                     <div className="flex -space-x-1.5">
                       {task.peers.done.map((p: any, i: number) => (
@@ -159,9 +202,18 @@ export default function TasksKanbanPage() {
                   <Calendar size={14} /> Tenggat: {new Date(selectedTask.dueDate).toLocaleDateString('id-ID')}
                 </p>
               </div>
-              <button onClick={() => setSelectedTask(null)} className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full text-gray-500 transition-colors">
-                <X size={24} />
-              </button>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => handleDeleteTask(selectedTask.id)}
+                  className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-500 rounded-full transition-colors"
+                  title="Hapus Tugas"
+                >
+                  <Trash2 size={24} />
+                </button>
+                <button onClick={() => setSelectedTask(null)} className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full text-gray-500 transition-colors">
+                  <X size={24} />
+                </button>
+              </div>
             </div>
 
             {/* Layout 2 Kolom Modal */}
@@ -171,31 +223,24 @@ export default function TasksKanbanPage() {
               <div className="flex-1 flex flex-col border-r border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950">
                 <div className="flex-1 p-6 overflow-y-auto space-y-6">
                   {/* Chat/Diskusi */}
-                  <div className="flex gap-4">
-                    <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-700 dark:text-indigo-400 font-bold shrink-0">A</div>
-                    <div>
-                      <div className="flex items-baseline gap-2 mb-1">
-                        <span className="font-semibold text-sm">Andi</span>
-                        <span className="text-xs text-gray-400">10:30 AM</span>
+                  {selectedTask.comments && selectedTask.comments.length > 0 ? selectedTask.comments.map((c: any) => (
+                    <div key={c.id} className="flex gap-4">
+                      <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-700 dark:text-indigo-400 font-bold shrink-0">
+                        {c.author?.username ? c.author.username[0].toUpperCase() : 'U'}
                       </div>
-                      <div className="bg-white dark:bg-zinc-900 p-3 rounded-2xl rounded-tl-none shadow-sm border border-gray-200 dark:border-zinc-800 text-sm text-gray-700 dark:text-gray-300">
-                        File tugas harus diunggah dalam format PDF kan ya?
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4">
-                    <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-bold shrink-0">B</div>
-                    <div>
-                      <div className="flex items-baseline gap-2 mb-1">
-                        <span className="font-semibold text-sm">Budi</span>
-                        <span className="text-xs text-gray-400">10:35 AM</span>
-                      </div>
-                      <div className="bg-white dark:bg-zinc-900 p-3 rounded-2xl rounded-tl-none shadow-sm border border-gray-200 dark:border-zinc-800 text-sm text-gray-700 dark:text-gray-300">
-                        Iya, max 20MB biar servernya ga jebol kata yang bikin LMS.
+                      <div>
+                        <div className="flex items-baseline gap-2 mb-1">
+                          <span className="font-semibold text-sm">{c.author?.username || 'User'}</span>
+                          <span className="text-xs text-gray-400">{new Date(c.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                        </div>
+                        <div className="bg-white dark:bg-zinc-900 p-3 rounded-2xl rounded-tl-none shadow-sm border border-gray-200 dark:border-zinc-800 text-sm text-gray-700 dark:text-gray-300">
+                          {c.content}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )) : (
+                    <div className="text-sm text-gray-500 italic text-center py-4">Belum ada diskusi. Mulai percakapan sekarang!</div>
+                  )}
                 </div>
 
                 {/* Input Komentar */}
@@ -205,10 +250,11 @@ export default function TasksKanbanPage() {
                       type="text" 
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && submitComment()}
                       placeholder="Balas diskusi..." 
                       className="flex-1 bg-gray-100 dark:bg-zinc-800 border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-950 focus:ring-2 rounded-xl px-4 py-3 text-sm outline-none transition-all"
                     />
-                    <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 rounded-xl flex items-center justify-center transition-colors shadow-sm">
+                    <button onClick={submitComment} className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 rounded-xl flex items-center justify-center transition-colors shadow-sm">
                       <Send size={18} />
                     </button>
                   </div>

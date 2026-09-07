@@ -5,6 +5,7 @@ import authRoutes from './routes/auth';
 import taskRoutes from './routes/tasks';
 import libraryRoutes from './routes/library';
 import recycleBinRoutes from './routes/recycleBin';
+import commentRoutes from './routes/comments';
 import path from 'path';
 
 dotenv.config();
@@ -25,6 +26,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/library', libraryRoutes);
 app.use('/api/recycle-bin', recycleBinRoutes);
+app.use('/api/comments', commentRoutes);
 
 // Health Check Endpoint
 app.get('/api/health', (req: Request, res: Response) => {

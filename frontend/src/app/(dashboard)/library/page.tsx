@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { UploadCloud, FileText, Eye, Download } from 'lucide-react';
+import { UploadCloud, FileText, Eye, Download, Trash2 } from 'lucide-react';
 
 export default function LibraryPage() {
   const [books, setBooks] = useState<any[]>([]);
@@ -14,6 +14,25 @@ export default function LibraryPage() {
       })
       .catch(console.error);
   }, []);
+
+  const handleDeleteBook = async (id: string) => {
+    if (!confirm('Yakin ingin memindahkan file ini ke Recycle Bin?')) return;
+    try {
+      const res = await fetch(`/api/library/${id}`, {
+        method: 'DELETE',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}` 
+        },
+        body: JSON.stringify({ user_id: localStorage.getItem('userId') })
+      });
+      if (res.ok) {
+        setBooks(books.filter(b => b.id !== id));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const onDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -178,6 +197,13 @@ export default function LibraryPage() {
               >
                 <Download size={16} /> Unduh
               </a>
+              <button 
+                onClick={() => handleDeleteBook(book.id)}
+                className="flex items-center justify-center bg-red-50 hover:bg-red-100 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 p-2 rounded-lg transition-colors"
+                title="Hapus ke Recycle Bin"
+              >
+                <Trash2 size={16} />
+              </button>
             </div>
             
           </div>

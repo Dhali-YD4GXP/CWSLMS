@@ -39,7 +39,12 @@ export const getTasks = async (req: Request, res: Response) => {
     const tasks = await prisma.task.findMany({
       orderBy: { due_date: 'asc' },
       include: {
-        progresses: true
+        progresses: true,
+        comments: {
+          include: {
+            author: true
+          }
+        }
       }
     });
     
@@ -56,7 +61,12 @@ export const getTask = async (req: Request, res: Response) => {
     const task = await prisma.task.findUnique({
       where: { id },
       include: {
-        progresses: true
+        progresses: true,
+        comments: {
+          include: {
+            author: true
+          }
+        }
       }
     });
     
